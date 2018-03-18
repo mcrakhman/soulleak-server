@@ -29,6 +29,7 @@
 (defn create-session []
   (def most-recent-session (+ most-recent-session 1))
   (def session-ids (conj session-ids most-recent-session))
+  (println "Created session")
   (fill-default-images-array most-recent-session)
   most-recent-session)
 
@@ -109,7 +110,15 @@
               (fill-default-images-array session-id)) 
             (response {:image-url (map #(image-url %) random-files)}))
     (response {:error "Image not found"})))
-                   
+
+(defn allow-cross-origin  
+  "middleware function to allow crosss origin"  
+  [handler]  
+  (fn [request]  
+    (let [response (handler request)]  
+    (assoc-in response [:headers "Access-Control-Allow-Origin"]  
+          "*"))))    
+
 (defn handle-images-request [session-id]
   (if (.contains session-ids session-id)
     (let [session-index (keyword (str session-id))
@@ -139,4 +148,5 @@
 (def app 
   (-> app-routes
     (wrap-json-response)
-    (wrap-defaults api-defaults)))
+    (wrap-defaults api-defaults)
+    (allow-cross-origin)))
