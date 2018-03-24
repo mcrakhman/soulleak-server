@@ -1,7 +1,7 @@
 (ns soulleak.handler
   (:require [compojure.core :refer :all]
             [clojure.java.io :as io]
-            [ring.middleware.json :refer [wrap-json-response]]
+            [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [ring.util.response :refer [content-type response resource-response]]
             [ring.middleware.resource :refer [wrap-resource]]
             [me.raynes.fs :refer :all]
@@ -11,7 +11,7 @@
 
 (def site-url "http://localhost:3000/")
 
-(def resources-images-path "resources/images")
+(def resources-images-path "resources/public")
 (def resources-audio-path "resources/audio")
 (def session-ids [])
 (def most-recent-session 0)
@@ -77,7 +77,7 @@
     (map #(.getName %) (map #(nth filepaths %) indices))))
    
 (defn jpg-resource [filename]
-  (-> (response (io/file (str "resources/images/" filename)))
+  (-> (response (io/file (str "resources/public/" filename)))
       (content-type "image/jpg")))
  
 (defn image-url [filename]
@@ -104,11 +104,11 @@
           previous-session-array (session-index session-image-map)
           random-numbers (generate-random-numbers (count previous-session-array) amount)
           random-file-numbers (map #(nth previous-session-array %) random-numbers)
-          random-files (files-in-folder resources-images-path random-file-numbers)]
+          random-files (filter #(string/ends-with? % ".jpg") (files-in-folder resources-images-path random-file-numbers))]
             (remove-images-from-session session-id random-file-numbers)
             (if (<= (count previous-session-array) (* amount 2))
               (fill-default-images-array session-id)) 
-            (response {:image-url (map #(image-url %) random-files)}))
+            (response {:image-url random-files}))
     (response {:error "Image not found"})))
 
 (defn allow-cross-origin  
@@ -140,13 +140,15 @@
         (map #(.getName %))))
 
 (defroutes app-routes
-  (POST "/new-session" [] (response {:session-id (create-session)}))
+  (POST "/new-session" [] (response {:session-id (str (create-session))}))
   (GET "/image-pack/:session-id" [session-id] (handle-images-pack-request (parse-int session-id) number-of-images-in-pack))
-  (GET "/images/:name" [session-id] (handle-images-request (parse-int session-id)))
+  ;(GET "/images/:name" [name] (jpg-resource name))
+  (route/resources "/images/")
   (route/not-found "Not Found")) 
 
 (def app 
   (-> app-routes
+    (wrap-json-body)
     (wrap-json-response)
     (wrap-defaults api-defaults)
     (allow-cross-origin)))
