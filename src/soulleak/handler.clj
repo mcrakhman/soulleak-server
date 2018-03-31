@@ -75,7 +75,13 @@
 (defn files-in-folder [folder indices]
   (let [filepaths (list-dir folder)]
     (map #(.getName %) (map #(nth filepaths %) indices))))
-   
+
+(defn get-image-ratio [filename]
+  (let [path (str "resources/public/" filename)]
+    (with-open [r (java.io.FileInputStream. path)]
+      (let [image (javax.imageio.ImageIO/read r)]
+        (/ (.getWidth image) (.getHeight image))))))
+    
 (defn jpg-resource [filename]
   (-> (response (io/file (str "resources/public/" filename)))
       (content-type "image/jpg")))
@@ -104,11 +110,12 @@
           previous-session-array (session-index session-image-map)
           random-numbers (generate-random-numbers (count previous-session-array) amount)
           random-file-numbers (map #(nth previous-session-array %) random-numbers)
-          random-files (filter #(string/ends-with? % ".jpg") (files-in-folder resources-images-path random-file-numbers))]
+          random-files (filter #(string/ends-with? % ".jpg") (files-in-folder resources-images-path random-file-numbers))
+          random-file-map (map #(assoc {} :file % :ratio (get-image-ratio %)) random-files)]
             (remove-images-from-session session-id random-file-numbers)
             (if (<= (count previous-session-array) (* amount 2))
               (fill-default-images-array session-id)) 
-            (response {:image-url random-files}))
+            (response {:image-url random-file-map}))
     (response {:error "Image not found"})))
 
 (defn allow-cross-origin  
@@ -118,19 +125,6 @@
     (let [response (handler request)]  
     (assoc-in response [:headers "Access-Control-Allow-Origin"]  
           "*"))))    
-
-(defn handle-images-request [session-id]
-  (if (.contains session-ids session-id)
-    (let [session-index (keyword (str session-id))
-          previous-session-array (session-index session-image-map)
-          random-index (rand-int (count previous-session-array))
-          random-file-number (nth previous-session-array random-index)
-          random-file (file-in-folder resources-images-path random-file-number)]
-            (remove-image-from-session session-id random-file-number)
-            (if (= (count previous-session-array) 1)
-              (fill-default-images-array session-id)) 
-            (response {:image-url (image-url random-file)}))
-    (response {:error "Image not found"})))
 
 (defn all-files-in-folder [amount]
   (->> (list-dir resources-images-path)
