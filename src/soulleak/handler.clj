@@ -110,7 +110,7 @@
           previous-session-array (session-index session-image-map)
           random-numbers (generate-random-numbers (count previous-session-array) amount)
           random-file-numbers (map #(nth previous-session-array %) random-numbers)
-          random-files (filter #(string/ends-with? % ".jpg") (files-in-folder resources-images-path random-file-numbers))
+          random-files (filter #(or (string/ends-with? % ".jpg") (string/ends-with? % ".gif")) (files-in-folder resources-images-path random-file-numbers))
           random-file-map (map #(assoc {} :file % :ratio (get-image-ratio %)) random-files)]
             (remove-images-from-session session-id random-file-numbers)
             (if (<= (count previous-session-array) (* amount 2))
@@ -125,13 +125,6 @@
     (let [response (handler request)]  
     (assoc-in response [:headers "Access-Control-Allow-Origin"]  
           "*"))))    
-
-(defn all-files-in-folder [amount]
-  (->> (list-dir resources-images-path)
-        (shuffle)
-        (filter #(string/ends-with? % ".jpg"))
-        (take amount)
-        (map #(.getName %))))
 
 (defroutes app-routes
   (POST "/new-session" [] (response {:session-id (str (create-session))}))
