@@ -27,6 +27,13 @@
         ((partial assoc {} :image-url))
         (response))))
 
+(defn handle-audio-request [session-id]
+  (if (not (session/is-valid-session-id? session-id)) 
+    (response {:error "Audio not found"})
+    (-> (session/take-audio session-id)
+        ((partial assoc {} :audio-url))
+        (response))))
+        
 (defn allow-cross-origin  
   "middleware function to allow crosss origin"  
   [handler]  
@@ -39,6 +46,7 @@
 (defroutes app-routes
   (POST "/new-session" [] (create-new-session-response))
   (GET "/image-pack/:session-id" [session-id needs-gif] (handle-image-request session-id (string-to-boolean needs-gif)))
+  (GET "/audio-pack/:session-id" [session-id] (handle-audio-request session-id))
   (route/resources "/")
   (route/not-found "Not Found")) 
 

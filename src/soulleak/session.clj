@@ -24,6 +24,7 @@
 (def gif-key :gifs)
 
 (def image-portion-count 4)
+(def audio-portion-count 4)
 (def gif-portion-count 1)
 
 ;; Atoms
@@ -109,7 +110,8 @@
 
 (defn take-reshuffle [amount session-id key]
     (let [initial-array (key ((keyword session-id) @session-data))
-          previous-array (if (< (count initial-array) (* amount 2))
+          adjusted-amount (min (count initial-array) amount)
+          previous-array (if (< (count initial-array) (* amount))
                             (add-reshuffled-array session-id key ((key all-folder-file-amount-map)))
                             initial-array)
           array-count (count previous-array)
@@ -120,7 +122,10 @@
 
 (defn take-images [session-id]
     (files-in-folder image-path (into [] (take-reshuffle image-portion-count session-id image-key))))     
-            
+
+(defn take-audio [session-id]
+    (files-in-folder audio-path (into [] (take-reshuffle audio-portion-count session-id audio-key))))     
+        
 (defn add-gif-if-needed [array needs-gif? session-id] 
     (if needs-gif? 
         (apply conj array
