@@ -32,17 +32,14 @@
   [handler]  
   (fn [request]  
     (let [response (handler request)]  
-    (assoc-in response [:headers "Access-Control-Allow-Origin"]  
-          "*"))))    
+    (assoc-in response [:headers "Access-Control-Allow-Origin"] "*"))))    
 
 ;; Routes
 
 (defroutes app-routes
   (POST "/new-session" [] (create-new-session-response))
   (GET "/image-pack/:session-id" [session-id needs-gif] (handle-image-request session-id (string-to-boolean needs-gif)))
-  (route/resources "/images/")
-  (route/resources "/gifs/")
-  (route/resources "/audio/")
+  (route/resources "/")
   (route/not-found "Not Found")) 
 
 (def app 
