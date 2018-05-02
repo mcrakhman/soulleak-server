@@ -14529,12 +14529,14 @@ var _zaboco$elm_draggable$Draggable$customConfig = function (events) {
 			events));
 };
 
-var _user$project$WindowSystem$windowAdjustedHeight = function (proposedHeight) {
-	return A2(_elm_lang$core$Basics$max, 30, proposedHeight);
-};
-var _user$project$WindowSystem$windowAdjustedWidth = function (proposedWidth) {
-	return A2(_elm_lang$core$Basics$max, 30, proposedWidth);
-};
+var _user$project$WindowSystem$windowAdjustedHeight = F2(
+	function (ratio, proposedHeight) {
+		return A2(_elm_lang$core$Basics$max, 60 / ratio, proposedHeight);
+	});
+var _user$project$WindowSystem$windowAdjustedWidth = F2(
+	function (ratio, proposedWidth) {
+		return A2(_elm_lang$core$Basics$max, 60, proposedWidth);
+	});
 var _user$project$WindowSystem$rightAndBottomSquareStyle = {
 	ctor: '::',
 	_0: A2(_user$project$Operators_ops['=>'], 'position', 'absolute'),
@@ -14842,22 +14844,22 @@ var _user$project$WindowSystem$updateWindowModel = F4(
 					return _elm_lang$core$Native_Utils.update(
 						_p6,
 						{
-							width: _user$project$WindowSystem$windowAdjustedWidth(_p8 + dx),
-							height: _user$project$WindowSystem$windowAdjustedHeight(_p5 + (dx / _p7))
+							width: A2(_user$project$WindowSystem$windowAdjustedWidth, _p7, _p8 + dx),
+							height: A2(_user$project$WindowSystem$windowAdjustedHeight, _p7, _p5 + (dx / _p7))
 						});
 				case 'BottomPanel':
 					return _elm_lang$core$Native_Utils.update(
 						_p6,
 						{
-							height: _user$project$WindowSystem$windowAdjustedHeight(_p5 + dy),
-							width: _user$project$WindowSystem$windowAdjustedWidth(_p8 + (dy * _p7))
+							height: A2(_user$project$WindowSystem$windowAdjustedHeight, _p7, _p5 + dy),
+							width: A2(_user$project$WindowSystem$windowAdjustedWidth, _p7, _p8 + (dy * _p7))
 						});
 				default:
 					return _elm_lang$core$Native_Utils.update(
 						_p6,
 						{
-							height: _user$project$WindowSystem$windowAdjustedHeight(_p5 + dy),
-							width: _user$project$WindowSystem$windowAdjustedWidth(_p8 + (dy * _p7))
+							height: A2(_user$project$WindowSystem$windowAdjustedHeight, _p7, _p5 + dy),
+							width: A2(_user$project$WindowSystem$windowAdjustedWidth, _p7, _p8 + (dy * _p7))
 						});
 			}
 		}
@@ -15634,7 +15636,7 @@ var _user$project$Main$tailOrEmptyList = function (list) {
 	}
 };
 var _user$project$Main$sessionDecoder = A2(_elm_lang$core$Json_Decode$field, 'session-id', _elm_lang$core$Json_Decode$string);
-var _user$project$Main$serverUrl = 'http://localhost:3000/';
+var _user$project$Main$serverUrl = 'http://178.62.206.167:3000/';
 var _user$project$Main$fullUrl = function (filename) {
 	return A2(_elm_lang$core$Basics_ops['++'], _user$project$Main$serverUrl, filename);
 };
